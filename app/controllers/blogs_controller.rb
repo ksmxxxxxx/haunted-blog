@@ -45,12 +45,13 @@ class BlogsController < ApplicationController
   private
 
   def set_show_blog
-    target_blog = Blog.find(params[:id])
+    target_user_blog = Blog.find(params[:id]).owned_by?(current_user)
 
-    return @blog = Blog.published.find(params[:id]) unless current_user
-    return @blog = Blog.published.find(params[:id]) if current_user && !target_blog.owned_by?(current_user)
-
-    @blog = target_blog if current_user && target_blog.owned_by?(current_user)
+    @blog = if current_user && target_user_blog
+              current_user.blogs.find(params[:id])
+            else
+              Blog.published.find(params[:id])
+            end
   end
 
   def set_editable_blog
